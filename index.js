@@ -99,7 +99,7 @@ io.on('connection', (socket) => {
   });
 
   socket.on('disconnect', () => {
-    io.emit('new-message', 'Serveur : Utilisateur ' + socket.handshake.session.username + ' vient de se déconnecter');
+    io.emit('new-message', 'Serveur : Utilisateur ' + socket.handshake.session.username + ' vient de se deconnecter');
     console.log('Un élève s\'est déconnecté');
   });
 });
