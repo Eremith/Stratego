@@ -3,13 +3,18 @@
     <head>
         <title>Stratego</title>
         <link rel="stylesheet" href="../css/index.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
         <script src="socket.io/socket.io.js"></script>
         <script src="../js/client.js"></script>
     </head>
     <body>
+        <h1>Veuillez saisir un nom d'utilisateur : </h1>
+        <form id="loginForm" action="">
+            <input id="username" autocomplete="off" placeholder="Username" />
+            <input type="submit" value="Se connecter" />
+        </form>
 
-
-
-        
+        <script src="../js/modules/logger.js"></script>
+        <script src="../js/login.js"></script>
     </body>
 </html>
