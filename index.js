@@ -1,9 +1,10 @@
 const express = require('express');
 const http = require('http');
 const socketio = require('socket.io');
+const createBoard = require('./back/modules/create-board');
 
 const session = require('express-session')({
-    secret: "eb8eryje8th4thehsetheth8eh8erheh5erherher1rh7erhwd9srh",
+    secret: "eb8fcc253281389225b4f7872f2336918ddc7f689e1fc41b64d5c4f378cdc438",
     resave: true,
     saveUninitialized: true,
     cookie:{
@@ -13,17 +14,29 @@ const session = require('express-session')({
 });
 const sharedsession = require('express-socket.io-session');
 const bodyParser = require('body-parser');
+const { body, validationResult } = require('express-validator');
 
 const jsonParser = bodyParser.json();
 const urlencodedParser = bodyParser.urlencoded({ extended: false});
-
-const { body, validationResult } = require('express-validator');
 
 const app = express();
 
 app.use(express.static(__dirname + '/front'));
 app.use(urlencodedParser);
 app.use(session);
+
+const server = http.createServer(app);
+const io = socketio(server);
+const { clear, getBoard, makeTurn } = createBoard(10);
+
+io.use(sharedsession(session, {
+    autoSave: true
+}));
+
+if (app.get('env') === 'production') {
+    app.set('trust proxy', 1)
+    session.cookie.secure = true
+}
 
 app.get('/', (req, res) => {
     let sessionData = req.session;
@@ -36,27 +49,21 @@ app.get('/', (req, res) => {
     }
 });
 
-app.post('/login', body('login').isLength({min: 3, max: 32 }).trim().escape(), (req, res) => {
-    login = req.body.login;
-
-    //errors management
+app.post('/login', body('login').isLength({ min: 3 }).trim().escape(), (req, res) => {
+    const login = req.body.login;
+  
+    // Error management
     const errors = validationResult(req);
-    if(!errors.isEmpty()){
-        console.log(errors);
-    } else{
-        //store login
-        req.session.username = login;
-        req.session.save();
-        res.redirect('/');
+    if (!errors.isEmpty()) {
+      console.log(errors);
+      //return res.status(400).json({ errors: errors.array() });
+    } else {
+      // Store login
+      req.session.username = login;
+      req.session.save()
+      res.redirect('/');
     }
-});
-
-const server = http.createServer(app);
-const io = socketio(server);
-
-io.use(sharedsession(session, {
-    autoSave: true
-}));
+  });
 
 io.on('connection', (sock) => {
     console.log('user connected');
@@ -67,6 +74,12 @@ io.on('connection', (sock) => {
             console.log(user.handshake.session.username);
         });
         io.emit('new-message', 'user' + socketio.handshake.session.username + ' logged in');
+    });
+
+    sock.emit('board', getBoard());
+    sock.on('turn', ({x, y}) => {
+        makeTurn(x, y, "blue");
+        io.emit('turn', { x, y});
     });
 
     sock.on('disconnect', () => {
