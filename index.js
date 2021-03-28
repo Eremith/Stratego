@@ -78,7 +78,7 @@ io.on('connection', (sock) => {
 
     sock.emit('board', getBoard());
     sock.on('turn', ({x, y}) => {
-        makeTurn(x, y, "blue");
+        makeTurn(x, y, "black");
         io.emit('turn', { x, y});
     });
 

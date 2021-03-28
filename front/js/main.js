@@ -1,13 +1,13 @@
-const getBoard = (canvas, numCells = 10) => {
+const getBoard = (canvas, numCells = 10) => { //fonctions pour gérer le board
     const ctx = canvas.getContext('2d');
     const cellSize = Math.floor(canvas.width / numCells);
 
-    const fillCell = (x, y, color) => {
+    const fillCell = (x, y, color) => { //colore une case selon couleur et ses coords
         ctx.fillStyle = color;
         ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
     };
 
-    const drawGrid = () => {
+    const drawGrid = () => { //dessine des lignes horizontales/verticales avec methode des canvas
         ctx.strokeStyle = "#565656";
         ctx.beginPath();
 
@@ -22,11 +22,11 @@ const getBoard = (canvas, numCells = 10) => {
         
     };
 
-    const clear = () => {
+    const clear = () => { //clear le canvas
         ctx.clearRect(0, 0, canvas.width, canvas.height);
     };
 
-    const renderBoard = (board = []) => {
+    const renderBoard = (board = []) => { //affiche le board en cours sauvegardé côté serv pour un nouveau utilisateur
         board.forEach((row, y) => {
             row.forEach((color, x) => {
                 color && fillCell(x, y, color);
@@ -34,13 +34,13 @@ const getBoard = (canvas, numCells = 10) => {
         });
     };
 
-    const reset = (board) => {
+    const reset = (board) => { //reset du board
         clear();
         drawGrid();
         renderBoard(board);
     };
 
-    const getCellCoords = ( x, y) => {
+    const getCellCoords = ( x, y) => { //renvoie la conversion des coords de la cellule selon les coords en paramètre
         return {
             x: Math.floor(x / cellSize),
             y: Math.floor(y / cellSize)
@@ -50,7 +50,7 @@ const getBoard = (canvas, numCells = 10) => {
     return { fillCell, reset, getCellCoords };
 };
 
-const getClickCoords = (elem, event) => {
+const getClickCoords = (elem, event) => { //renvoie les coords de l'event dans l'élément passé en paramètre
     const { top, left } = elem.getBoundingClientRect();
     const { clientX, clientY} = event;
 
@@ -62,11 +62,11 @@ const getClickCoords = (elem, event) => {
 
 (() => {
     
-    const canvas = document.querySelector('canvas');
-    const { fillCell, reset, getCellCoords } = getBoard(canvas);
+    const canvas = document.querySelector('canvas'); //sélection du canvas
+    const { fillCell, reset, getCellCoords } = getBoard(canvas); //récupération des fonctions de getBoard avec un canvas en paramètre
     const sock = io();
 
-    const onClick = (e) => {
+    const onClick = (e) => { //envoie les coords de l'endroit cliqué côté serv
         const { x, y} = getClickCoords(canvas, e);
         sock.emit('turn', getCellCoords( x, y ));
     };
