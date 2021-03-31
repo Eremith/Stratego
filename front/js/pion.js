@@ -1,6 +1,7 @@
 class pion{
 
-    constructor(number, x, y){
+    constructor(number, x, y, player){
+        this.player = player;
         this.number = number;
         this.alive = true;
         if (number == 0 || number == 11) {
@@ -42,7 +43,11 @@ class pion{
         }
     }
 
-    move(tab, dir, nbomov){
+    move(tab, dir, nbomov, player){
+        if (this.player != player) {
+            alarm("Alors, on essaye de tricher mon petit bonhomme ?");
+            return 0;
+        }
         switch (this.movement) {
             case 0:
                 alarm("Cette pièce ne bouge pas, petit coquin");
