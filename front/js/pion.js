@@ -209,5 +209,12 @@ class pion{
         }
     }
 
-
+    swap(pion){
+        let tmpX = this.x;
+        let tmpY = this.y;
+        this.x = pion.x;
+        this.y = pion.y;
+        pion.x = tmpX;
+        pion.y = tmpY;
+    }
 }
