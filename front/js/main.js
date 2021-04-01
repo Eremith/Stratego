@@ -72,7 +72,7 @@ const getClickCoords = (elem, event) => { //renvoie les coords de l'event dans l
     };
 
     sock.on('board', reset);
-    sock.on('turn', ({ x, y}) => fillCell(x, y));
+    sock.on('turn', ({ x, y, color}) => fillCell(x, y, color));
 
     canvas.addEventListener('click', onClick);
 

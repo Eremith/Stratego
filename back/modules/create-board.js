@@ -1,6 +1,15 @@
 const createBoard = size => {
 
-    let board;
+    let board = [["blue","yellow","blue","yellow","blue","yellow","blue","yellow","blue","yellow"],
+    ["blue","yellow","blue","yellow","blue","yellow","blue","yellow","blue","yellow"],
+    ["blue","yellow","blue","yellow","blue","yellow","blue","yellow","blue","yellow"],
+    ["blue","yellow","blue","yellow","blue","yellow","blue","yellow","blue","yellow"],
+    ["blue","yellow","blue","yellow","blue","yellow","blue","yellow","blue","yellow"],
+    ["blue","yellow","blue","yellow","blue","yellow","blue","yellow","blue","yellow"],
+    ["blue","yellow","blue","yellow","blue","yellow","blue","yellow","blue","yellow"],
+    ["blue","","blue","yellow","blue","yellow","blue","yellow","blue","yellow"],
+    ["blue","yellow","blue","yellow","blue","yellow","blue","yellow","blue","yellow"],
+    ["blue","yellow","blue","yellow","blue","yellow","blue","yellow","blue","yellow"]];
 
     const clear = () => {
         board = Array(size).fill().map(() => Array(size).fill(null));
@@ -12,7 +21,9 @@ const createBoard = size => {
         board[y][x] = color;
     };
 
-    clear();
+    if(board == undefined){
+        clear();
+    }
 
     return {
         clear, makeTurn, getBoard
