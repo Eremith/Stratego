@@ -67,7 +67,7 @@ app.post('/login', body('login').isLength({ min: 3 }).trim().escape(), (req, res
 
 io.on('connection', (sock) => {
     console.log('user connected');
-    const color = "red";
+    const image = "bombe";
 
     sock.on('login', () => {
         let srvSockets = io.sockets.sockets;
@@ -79,8 +79,8 @@ io.on('connection', (sock) => {
 
     sock.emit('board', getBoard());
     sock.on('turn', ({x, y}) => {
-        makeTurn(x, y, color);
-        io.emit('turn', { x, y, color });
+        makeTurn(x, y, image);
+        io.emit('turn', { x, y, image });
     });
 
     sock.on('disconnect', () => {

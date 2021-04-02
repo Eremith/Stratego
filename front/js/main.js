@@ -2,9 +2,14 @@ const getBoard = (canvas, numCells = 10) => { //fonctions pour gérer le board
     const ctx = canvas.getContext('2d');
     const cellSize = Math.floor(canvas.width / numCells);
 
-    const fillCell = (x, y, color) => { //colore une case selon couleur et ses coords
-        ctx.fillStyle = color;
-        ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+    const fillCell = (x, y, image) => { //colore une case selon couleur et ses coords
+        let img = new Image();
+        img.src = "images/" + image + ".png";
+        ctx.drawImage(img, x*cellSize, y*cellSize);
+
+        console.log(image + " affiched");
+        //ctx.fillStyle = image;
+        //ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
     };
 
     const drawGrid = () => { //dessine des lignes horizontales/verticales avec methode des canvas
@@ -28,8 +33,8 @@ const getBoard = (canvas, numCells = 10) => { //fonctions pour gérer le board
 
     const renderBoard = (board = []) => { //affiche le board en cours sauvegardé côté serv pour un nouveau utilisateur
         board.forEach((row, y) => {
-            row.forEach((color, x) => {
-                color && fillCell(x, y, color);
+            row.forEach((image, x) => {
+                image && fillCell(x, y, image);
             });
         });
     };
@@ -72,7 +77,7 @@ const getClickCoords = (elem, event) => { //renvoie les coords de l'event dans l
     };
 
     sock.on('board', reset);
-    sock.on('turn', ({ x, y, color}) => fillCell(x, y, color));
+    sock.on('turn', ({ x, y, image}) => fillCell(x, y, image));
 
     canvas.addEventListener('click', onClick);
 
