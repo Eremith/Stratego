@@ -71,6 +71,11 @@ const getClickCoords = (elem, event) => { //renvoie les coords de l'event dans l
     const { fillCell, reset, getCellCoords } = getBoard(canvas); //récupération des fonctions de getBoard avec un canvas en paramètre
     const sock = io();
 
+    sock.on('connectToRoom',function(data) {
+        let room = document.getElementById('room');
+        room.innerHTML = data;
+    });
+
     const onClick = (e) => { //envoie les coords de l'endroit cliqué côté serv
         const { x, y} = getClickCoords(canvas, e);
         sock.emit('turn', getCellCoords( x, y ));

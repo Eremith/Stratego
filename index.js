@@ -63,8 +63,9 @@ app.post('/login', body('login').isLength({ min: 3 }).trim().escape(), (req, res
       req.session.save()
       res.redirect('/');
     }
-  });
+});
 
+let roomno = 1;
 io.on('connection', (sock) => {
     console.log('user connected');
     const image = "bombe";
@@ -76,6 +77,11 @@ io.on('connection', (sock) => {
         });
         io.emit('new-message', 'user' + socketio.handshake.session.username + ' logged in');
     });
+
+    if(io.sockets.adapter.rooms.get("room-"+roomno) && io.sockets.adapter.rooms.get("room-"+roomno).size > 1) roomno++;
+    sock.join("room-"+roomno);
+
+    io.sockets.in("room-"+roomno).emit('connectToRoom', "You are in room no. "+roomno);
 
     sock.emit('board', getBoard());
     sock.on('turn', ({x, y}) => {
