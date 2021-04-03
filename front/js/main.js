@@ -74,10 +74,11 @@ const getClickCoords = (elem, event) => { //renvoie les coords de l'event dans l
     sock.on('connectToRoom',function(data) {
         let room = document.getElementById('room');
         room.innerHTML = data;
+        sock.emit('nameRoom', "room-"+data);
     });
 
     const onClick = (e) => { //envoie les coords de l'endroit cliqué côté serv
-        const { x, y} = getClickCoords(canvas, e);
+        const { x, y } = getClickCoords(canvas, e);
         sock.emit('turn', getCellCoords( x, y ));
     };
 

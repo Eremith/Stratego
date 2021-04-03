@@ -81,12 +81,16 @@ io.on('connection', (sock) => {
     if(io.sockets.adapter.rooms.get("room-"+roomno) && io.sockets.adapter.rooms.get("room-"+roomno).size > 1) roomno++;
     sock.join("room-"+roomno);
 
-    io.sockets.in("room-"+roomno).emit('connectToRoom', "You are in room no. "+roomno);
+    io.sockets.in("room-"+roomno).emit('connectToRoom', roomno);
 
-    sock.emit('board', getBoard());
-    sock.on('turn', ({x, y}) => {
-        makeTurn(x, y, image);
-        io.emit('turn', { x, y, image });
+    io.sockets.in("room-"+roomno).emit('board', getBoard());
+
+    sock.on('nameRoom', (room)=>{
+        console.log("room = "+room);
+        sock.on('turn', ({x, y}) => {
+            makeTurn(x, y, image);
+            io.to(room).emit('turn', { x, y, image });
+        });
     });
 
     sock.on('disconnect', () => {
