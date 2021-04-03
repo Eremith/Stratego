@@ -7,24 +7,29 @@
         <link rel="stylesheet" href="../css/index.css">
     </head>
     <body>
-        <img src="images/bombe.png" alt="bombe">
-        <img src="images/capitaine.png" alt="capitaine">
-        <img src="images/colonel.png" alt="colonel">
-        <img src="images/commandant.png" alt="commandant">
-        <img src="images/demineur.png" alt="demineur">
-        <img src="images/dosbleu.png" alt="dosbleu">
-        <img src="images/dosrouge.png" alt="dosrouge">
-        <img src="images/drapeau.png" alt="drapeau">
-        <img src="images/eclaireur.png" alt="eclaireur">
-        <img src="images/espion.png" alt="espion">
-        <img src="images/general.png" alt="general">
-        <img src="images/lieutenant.png" alt="lieutenant">
-        <img src="images/marechal.png" alt="marechal">
-        <img src="images/sergent.png" alt="sergent">
+        
+        <div id="maDivGauche" style="float:left">
+            <strong><a id="name"></a>: Vous êtes dans la room <a id="room"></a></strong><br>
+            <canvas id="canvas" height="800" width="800"></canvas>
+        </div>
+        
+        <div id="maDivDroite" style="float:right;clear:right;">
+            <img src="images/bombe.png" alt="bombe">
+            <img src="images/capitaine.png" alt="capitaine"><br>
+            <img src="images/colonel.png" alt="colonel">
+            <img src="images/commandant.png" alt="commandant"><br>
+            <img src="images/demineur.png" alt="demineur">
+            <img src="images/dosbleu.png" alt="dosbleu"><br>
+            <img src="images/dosrouge.png" alt="dosrouge">
+            <img src="images/drapeau.png" alt="drapeau"><br>
+            <img src="images/eclaireur.png" alt="eclaireur">
+            <img src="images/espion.png" alt="espion"><br>
+            <img src="images/general.png" alt="general">
+            <img src="images/lieutenant.png" alt="lieutenant"><br>
+            <img src="images/marechal.png" alt="marechal">
+            <img src="images/sergent.png" alt="sergent">
+        </div>
 
-        <strong>Vous êtes dans la room <a id="room"></a></strong>
-
-        <canvas id="canvas" height="800" width="800"></canvas>
     </body>
 
     <script src="../js/pion.js"></script>
