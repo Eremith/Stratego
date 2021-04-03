@@ -2,12 +2,24 @@ const getBoard = (canvas, id, numCells = 10) => { //fonctions pour gérer le boa
     const ctx = canvas.getContext('2d');
     const cellSize = Math.floor(canvas.width / numCells);
 
-    const fillCell = (x, y, image) => { //colore une case selon couleur et ses coords
+    const fillCell = (x, y, pion) => { //colore une case selon couleur et ses coords
         let img = new Image();
-        img.src = "images/" + image + ".png";
-        ctx.drawImage(img, x*cellSize, y*cellSize);
+        if(id == pion.id){
+            img.src = "images/" + pion.image + ".png";
+            ctx.drawImage(img, x*cellSize, y*cellSize);
+        } else {
+            if(id == 0){
+                img.src = "images/dosrouge.png";
+                ctx.drawImage(img, x*cellSize, y*cellSize);
+            } else {
+                img.src = "images/dosbleu.png";
+                ctx.drawImage(img, x*cellSize, y*cellSize);
+            }
+            
+        }
+        
 
-        console.log(image + " affiched");
+        console.log(pion.image + " affiched");
     };
 
     const drawGrid = () => { //dessine des lignes horizontales/verticales avec methode des canvas
@@ -33,17 +45,7 @@ const getBoard = (canvas, id, numCells = 10) => { //fonctions pour gérer le boa
         board.forEach((row, y) => {
             row.forEach((pion, x) => {
                 if(pion){
-                    console.log("iddu joueur = "+id);
-                    console.log("id du pion = "+pion.id);
-                    if(id == pion.id){
-                        fillCell(x, y, pion.image);
-                    } else {
-                        if(id == 0){
-                            fillCell(x,y,"dosbleu");
-                        }else{
-                            fillCell(x,y,"dosrouge");
-                        }
-                    }
+                    fillCell(x, y, pion);
                 }
             });
         });
@@ -98,7 +100,7 @@ const getClickCoords = (elem, event) => { //renvoie les coords de l'event dans l
         };
 
         sock.on('board', reset);
-        sock.on('turn', ({ x, y, image}) => fillCell(x, y, image));
+        sock.on('turn', ({ x, y, pion}) => fillCell(x, y, pion));
 
         canvas.addEventListener('click', onClick);
 

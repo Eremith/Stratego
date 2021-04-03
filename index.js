@@ -65,13 +65,15 @@ app.post('/login', body('login').isLength({ min: 3 }).trim().escape(), (req, res
 });
 
 let roomno = 1;
-let clicks = 0;
+let clicks = [0];
 io.on('connection', (sock) => {
     console.log(sock.handshake.session.username + " connected");
 
-    const image = "bombe";
-
-    if(io.sockets.adapter.rooms.get("room-"+roomno) && io.sockets.adapter.rooms.get("room-"+roomno).size > 1) roomno++;
+    if(io.sockets.adapter.rooms.get("room-"+roomno) && io.sockets.adapter.rooms.get("room-"+roomno).size > 1){
+        roomno++;
+        clicks.push(0);
+        console.log("nouvelle room : "+clicks);
+    } 
     sock.join("room-"+roomno);
 
     let tmpId;
@@ -84,9 +86,10 @@ io.on('connection', (sock) => {
         name:sock.handshake.session.username,
         id:tmpId
     }
+    const pion = {image:"bombe", id:tmpId};
     console.log("name="+dataPlayer.name + " id="+dataPlayer.id);
 
-    sock.emit('sendData', dataPlayer);
+    sock.emit('sendData', dataPlayer)
 
     io.sockets.in("room-"+roomno).emit('connectToRoom', roomno);
 
@@ -95,10 +98,14 @@ io.on('connection', (sock) => {
     sock.on('nameRoom', (room)=>{
         console.log("room = "+room);
         sock.on('turn', ({x, y}) => {
-            if(clicks%2 == dataPlayer.id){
-                makeTurn(x, y, image, dataPlayer.id);
-                io.to(room).emit('turn', { x, y, image });
-                clicks++;
+            let nbRoom = room;
+            nbRoom = nbRoom.slice(5);
+            nbRoom = parseInt(nbRoom);
+            if(clicks[nbRoom - 1] % 2 == dataPlayer.id){
+                makeTurn(x, y, pion, dataPlayer.id);
+                io.to(room).emit('turn', { x, y, pion });
+                clicks[nbRoom - 1]++;
+                console.log("tableau des clics par room" + clicks);
             }
         });
     });

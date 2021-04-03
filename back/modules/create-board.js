@@ -19,8 +19,8 @@ const createBoard = size => {
 
     const getBoard = () => board;
 
-    const makeTurn = (x, y, image, idPlayer) => {
-        board[y][x].image = image;
+    const makeTurn = (x, y, pion, idPlayer) => {
+        board[y][x].image = pion.image;
         board[y][x].id = idPlayer;
     };
 
