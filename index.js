@@ -86,6 +86,8 @@ io.on('connection', (sock) => {
     }
     console.log("name="+dataPlayer.name + " id="+dataPlayer.id);
 
+    sock.emit('sendData', dataPlayer);
+
     io.sockets.in("room-"+roomno).emit('connectToRoom', roomno);
 
     io.sockets.in("room-"+roomno).emit('board', getBoard());
@@ -94,7 +96,7 @@ io.on('connection', (sock) => {
         console.log("room = "+room);
         sock.on('turn', ({x, y}) => {
             if(clicks%2 == dataPlayer.id){
-                makeTurn(x, y, image);
+                makeTurn(x, y, image, dataPlayer.id);
                 io.to(room).emit('turn', { x, y, image });
                 clicks++;
             }
@@ -103,7 +105,7 @@ io.on('connection', (sock) => {
 
     sock.on('disconnect', () => {
         io.emit('new-message', 'user' + sock.handshake.session.username + ' disconnected');
-        console.log('an user disconnected');
+        console.log(sock.handshake.session.username+' disconnected');
     });
 });
 

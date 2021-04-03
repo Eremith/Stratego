@@ -1,4 +1,4 @@
-const getBoard = (canvas, numCells = 10) => { //fonctions pour gérer le board
+const getBoard = (canvas, id, numCells = 10) => { //fonctions pour gérer le board
     const ctx = canvas.getContext('2d');
     const cellSize = Math.floor(canvas.width / numCells);
 
@@ -8,8 +8,6 @@ const getBoard = (canvas, numCells = 10) => { //fonctions pour gérer le board
         ctx.drawImage(img, x*cellSize, y*cellSize);
 
         console.log(image + " affiched");
-        //ctx.fillStyle = image;
-        //ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
     };
 
     const drawGrid = () => { //dessine des lignes horizontales/verticales avec methode des canvas
@@ -33,8 +31,20 @@ const getBoard = (canvas, numCells = 10) => { //fonctions pour gérer le board
 
     const renderBoard = (board = []) => { //affiche le board en cours sauvegardé côté serv pour un nouveau utilisateur
         board.forEach((row, y) => {
-            row.forEach((image, x) => {
-                image && fillCell(x, y, image);
+            row.forEach((pion, x) => {
+                if(pion){
+                    console.log("iddu joueur = "+id);
+                    console.log("id du pion = "+pion.id);
+                    if(id == pion.id){
+                        fillCell(x, y, pion.image);
+                    } else {
+                        if(id == 0){
+                            fillCell(x,y,"dosbleu");
+                        }else{
+                            fillCell(x,y,"dosrouge");
+                        }
+                    }
+                }
             });
         });
     };
@@ -45,7 +55,7 @@ const getBoard = (canvas, numCells = 10) => { //fonctions pour gérer le board
         renderBoard(board);
     };
 
-    const getCellCoords = ( x, y) => { //renvoie la conversion des coords de la cellule selon les coords en paramètre
+    const getCellCoords = ( x, y ) => { //renvoie la conversion des coords de la cellule selon les coords en paramètre
         return {
             x: Math.floor(x / cellSize),
             y: Math.floor(y / cellSize)
@@ -66,31 +76,37 @@ const getClickCoords = (elem, event) => { //renvoie les coords de l'event dans l
 };
 
 (() => {
-    
-    const canvas = document.querySelector('canvas'); //sélection du canvas
-    const { fillCell, reset, getCellCoords } = getBoard(canvas); //récupération des fonctions de getBoard avec un canvas en paramètre
     const sock = io();
 
-    sock.on('connectToRoom',function(data) {
-        let room = document.getElementById('room');
-        room.innerHTML = data;
-        sock.emit('nameRoom', "room-"+data);
+    sock.on('sendData', (dataPlayer) => {
+        let idJoueur = dataPlayer.id;
+        console.log("id de ce joueur = " + dataPlayer.id);
+
+        const canvas = document.querySelector('canvas'); //sélection du canvas
+        console.log("id du joueur appel getboard = "+idJoueur);
+        const { fillCell, reset, getCellCoords } = getBoard(canvas, idJoueur); //récupération des fonctions de getBoard avec un canvas en paramètre
+        
+        sock.on('connectToRoom',function(data) {
+            let room = document.getElementById('room');
+            room.innerHTML = data;
+            sock.emit('nameRoom', "room-"+data);
+        });
+
+        const onClick = (e) => { //envoie les coords de l'endroit cliqué côté serv
+            const { x, y } = getClickCoords(canvas, e);
+            sock.emit('turn', getCellCoords( x, y ));
+        };
+
+        sock.on('board', reset);
+        sock.on('turn', ({ x, y, image}) => fillCell(x, y, image));
+
+        canvas.addEventListener('click', onClick);
+
+        //let test1 = new pion(1);
+        //let test2 = new pion(0);
+        //test1.battle(test2);
+        //console.log(test1.alive);
+        //console.log(test2.alive);
     });
-
-    const onClick = (e) => { //envoie les coords de l'endroit cliqué côté serv
-        const { x, y } = getClickCoords(canvas, e);
-        sock.emit('turn', getCellCoords( x, y ));
-    };
-
-    sock.on('board', reset);
-    sock.on('turn', ({ x, y, image}) => fillCell(x, y, image));
-
-    canvas.addEventListener('click', onClick);
-
-    //let test1 = new pion(1);
-    //let test2 = new pion(0);
-    //test1.battle(test2);
-    //console.log(test1.alive);
-    //console.log(test2.alive);
 
 })();
