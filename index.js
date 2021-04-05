@@ -27,7 +27,6 @@ app.use(session);
 
 const server = http.createServer(app);
 const io = socketio(server);
-const { clear, getBoard, makeTurn } = createBoard(10);
 
 io.use(sharedsession(session, {
     autoSave: true
@@ -66,13 +65,17 @@ app.post('/login', body('login').isLength({ min: 3 }).trim().escape(), (req, res
 
 let roomno = 1;
 let clicks = [0];
+let boards = [];
+boards[0] = createBoard(10);
 io.on('connection', (sock) => {
+    //const { clear, getBoard, makeTurn } = createBoard(10);
     console.log(sock.handshake.session.username + " connected");
 
     if(io.sockets.adapter.rooms.get("room-"+roomno) && io.sockets.adapter.rooms.get("room-"+roomno).size > 1){
         roomno++;
         clicks.push(0);
         console.log("nouvelle room : "+clicks);
+        boards.push(createBoard(10));
     } 
     sock.join("room-"+roomno);
 
@@ -89,28 +92,42 @@ io.on('connection', (sock) => {
     const pion = {image:"bombe", id:tmpId};
     console.log("name="+dataPlayer.name + " id="+dataPlayer.id);
 
-    sock.emit('sendData', dataPlayer)
+    sock.emit('sendData', dataPlayer);
 
     io.sockets.in("room-"+roomno).emit('connectToRoom', roomno);
 
-    io.sockets.in("room-"+roomno).emit('board', getBoard());
-
+    let nbRoom = 0;
     sock.on('nameRoom', (room)=>{
+        nbRoom = room;
+        nbRoom = nbRoom.slice(5);
+        nbRoom = parseInt(nbRoom);
+
+        io.sockets.in("room-"+roomno).emit('board', boards[nbRoom - 1].getBoard());
+
         console.log("room = "+room);
+
+        sock.on('swap', ({tmpX, tmpY, tmpXToSwitch, tmpYToSwitch}) => {
+            boards[nbRoom - 1].swap(tmpX, tmpY, tmpXToSwitch, tmpYToSwitch);
+            let board = boards[nbRoom - 1].getBoard();
+            let pion = board[tmpY][tmpX];
+            let pionToSwitch = board[tmpYToSwitch][tmpXToSwitch];
+            io.sockets.in("room-"+roomno).emit('retourSwap', {pion, pionToSwitch});
+        });
+        /*
         sock.on('turn', ({x, y}) => {
-            let nbRoom = room;
-            nbRoom = nbRoom.slice(5);
-            nbRoom = parseInt(nbRoom);
+            
             if(clicks[nbRoom - 1] % 2 == dataPlayer.id){
-                makeTurn(x, y, pion, dataPlayer.id);
-                io.to(room).emit('turn', { x, y, pion });
                 clicks[nbRoom - 1]++;
-                console.log("tableau des clics par room" + clicks);
+                boards[nbRoom - 1].makeTurn(x, y, pion, dataPlayer.id);
+                io.to(room).emit('turn', { x, y, pion, clicks });
+                console.log("tableau des clics par room " + clicks);
             }
         });
+        */
     });
 
     sock.on('disconnect', () => {
+        sock.leave("room-"+roomno);
         io.emit('new-message', 'user' + sock.handshake.session.username + ' disconnected');
         console.log(sock.handshake.session.username+' disconnected');
     });

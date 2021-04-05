@@ -4,7 +4,7 @@ const getBoard = (canvas, id, numCells = 10) => { //fonctions pour gérer le boa
 
     const fillCell = (x, y, pion) => { //colore une case selon couleur et ses coords
         let img = new Image();
-        if(id == pion.id){
+        if(id == pion.id || pion.id == 2){
             img.src = "images/" + pion.image + ".png";
             ctx.drawImage(img, x*cellSize, y*cellSize);
         } else {
@@ -20,6 +20,10 @@ const getBoard = (canvas, id, numCells = 10) => { //fonctions pour gérer le boa
         
 
         console.log(pion.image + " affiched");
+    };
+
+    const clearCell = (x, y) => {
+        ctx.clearRect(x*cellSize, y*cellSize, cellSize - 1, cellSize - 1);
     };
 
     const drawGrid = () => { //dessine des lignes horizontales/verticales avec methode des canvas
@@ -59,12 +63,12 @@ const getBoard = (canvas, id, numCells = 10) => { //fonctions pour gérer le boa
 
     const getCellCoords = ( x, y ) => { //renvoie la conversion des coords de la cellule selon les coords en paramètre
         return {
-            x: Math.floor(x / cellSize),
-            y: Math.floor(y / cellSize)
+            x2: Math.floor(x / cellSize),
+            y2: Math.floor(y / cellSize)
         };
     };
 
-    return { fillCell, reset, getCellCoords };
+    return { fillCell, reset, getCellCoords, clearCell };
 };
 
 const getClickCoords = (elem, event) => { //renvoie les coords de l'event dans l'élément passé en paramètre
@@ -86,7 +90,7 @@ const getClickCoords = (elem, event) => { //renvoie les coords de l'event dans l
 
         const canvas = document.querySelector('canvas'); //sélection du canvas
         console.log("id du joueur appel getboard = "+idJoueur);
-        const { fillCell, reset, getCellCoords } = getBoard(canvas, idJoueur); //récupération des fonctions de getBoard avec un canvas en paramètre
+        const { fillCell, reset, getCellCoords, clearCell } = getBoard(canvas, idJoueur); //récupération des fonctions de getBoard avec un canvas en paramètre
         
         sock.on('connectToRoom',function(data) {
             let room = document.getElementById('room');
@@ -94,15 +98,49 @@ const getClickCoords = (elem, event) => { //renvoie les coords de l'event dans l
             sock.emit('nameRoom', "room-"+data);
         });
 
-        const onClick = (e) => { //envoie les coords de l'endroit cliqué côté serv
-            const { x, y } = getClickCoords(canvas, e);
-            sock.emit('turn', getCellCoords( x, y ));
+        //const onClick = (e) => { //envoie les coords de l'endroit cliqué côté serv
+        //    const { x, y } = getClickCoords(canvas, e);
+        //    sock.emit('turn', getCellCoords( x, y ));
+        //};
+
+        let tmpX = "";
+        let tmpY = "";
+        let tmpXToSwitch = "";
+        let tmpYToSwitch = "";
+        let cl = 0;
+        const onClick = (e) => { //
+            if(cl % 2 == 0){
+                console.log("1er pion selectionné");
+                let { x, y } = getClickCoords(canvas, e);
+                let { x2, y2 } = getCellCoords( x, y );
+                tmpX = x2;
+                tmpY = y2;
+                console.log("tmp x et y = " + tmpX + " " + tmpY + " tmptoswitch x et y = " + tmpXToSwitch + " " + tmpYToSwitch);
+                cl++;
+            } else if(cl % 2 == 1){
+                console.log("et 2eme");
+                let { x, y } = getClickCoords(canvas, e);
+                let { x2, y2 } = getCellCoords( x, y );
+                tmpXToSwitch = x2;
+                tmpYToSwitch = y2;
+                sock.emit('swap', ({tmpX, tmpY, tmpXToSwitch, tmpYToSwitch}));
+                sock.on('retourSwap', ({pion, pionToSwitch}) => {
+                    clearCell(tmpX, tmpY);
+                    clearCell(tmpXToSwitch, tmpYToSwitch);
+                    fillCell(tmpX, tmpY, pion);
+                    fillCell(tmpXToSwitch, tmpYToSwitch, pionToSwitch);
+                    console.log("swap!");
+                });
+                console.log("tmp x et y = " + tmpX + " " + tmpY + " tmptoswitch x et y = " + tmpXToSwitch + " " + tmpYToSwitch);
+                cl++;
+            }
         };
+        canvas.addEventListener('click', onClick);
 
         sock.on('board', reset);
-        sock.on('turn', ({ x, y, pion}) => fillCell(x, y, pion));
+        //sock.on('turn', ({ x, y, pion, clicks}) => fillCell(x, y, pion));
 
-        canvas.addEventListener('click', onClick);
+        
 
         //let test1 = new pion(1);
         //let test2 = new pion(0);
