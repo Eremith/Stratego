@@ -89,7 +89,7 @@ io.on('connection', (sock) => {
         name:sock.handshake.session.username,
         id:tmpId
     }
-    const pion = {image:"bombe", id:tmpId};
+    //const pion = {image:"bombe", id:tmpId};
     console.log("name="+dataPlayer.name + " id="+dataPlayer.id);
 
     sock.emit('sendData', dataPlayer);
@@ -105,25 +105,25 @@ io.on('connection', (sock) => {
         io.sockets.in("room-"+roomno).emit('board', boards[nbRoom - 1].getBoard());
 
         console.log("room = "+room);
+    });
 
-        sock.on('swap', ({tmpX, tmpY, tmpXToSwitch, tmpYToSwitch}) => {
-            boards[nbRoom - 1].swap(tmpX, tmpY, tmpXToSwitch, tmpYToSwitch);
-            let board = boards[nbRoom - 1].getBoard();
-            let pion = board[tmpY][tmpX];
-            let pionToSwitch = board[tmpYToSwitch][tmpXToSwitch];
-            io.sockets.in("room-"+roomno).emit('retourSwap', {pion, pionToSwitch});
-        });
-        /*
-        sock.on('turn', ({x, y}) => {
-            
-            if(clicks[nbRoom - 1] % 2 == dataPlayer.id){
-                clicks[nbRoom - 1]++;
-                boards[nbRoom - 1].makeTurn(x, y, pion, dataPlayer.id);
-                io.to(room).emit('turn', { x, y, pion, clicks });
-                console.log("tableau des clics par room " + clicks);
-            }
-        });
-        */
+    /*
+    sock.on('turn', ({x, y}) => {        
+        if(clicks[nbRoom - 1] % 2 == dataPlayer.id){
+            clicks[nbRoom - 1]++;
+            boards[nbRoom - 1].makeTurn(x, y, pion, dataPlayer.id);
+            io.to(room).emit('turn', { x, y, pion, clicks });
+            console.log("tableau des clics par room " + clicks);
+        }
+    });
+    */
+
+    sock.on('swap', ({tmpX, tmpY, tmpXToSwitch, tmpYToSwitch}) => {
+        boards[nbRoom - 1].swap(tmpX, tmpY, tmpXToSwitch, tmpYToSwitch);
+        let board = boards[nbRoom - 1].getBoard();
+        let pion = board[tmpY][tmpX];
+        let pionToSwitch = board[tmpYToSwitch][tmpXToSwitch];
+        io.sockets.in("room-"+roomno).emit('retourSwap', {pion, pionToSwitch});
     });
 
     sock.on('disconnect', () => {

@@ -11,14 +11,11 @@ const getBoard = (canvas, id, numCells = 10) => { //fonctions pour gérer le boa
             if(id == 0){
                 img.src = "images/dosrouge.png";
                 ctx.drawImage(img, x*cellSize, y*cellSize);
-            } else {
+            } else if(id == 1){
                 img.src = "images/dosbleu.png";
                 ctx.drawImage(img, x*cellSize, y*cellSize);
             }
-            
         }
-        
-
         console.log(pion.image + " affiched");
     };
 
@@ -91,12 +88,6 @@ const getClickCoords = (elem, event) => { //renvoie les coords de l'event dans l
         const canvas = document.querySelector('canvas'); //sélection du canvas
         console.log("id du joueur appel getboard = "+idJoueur);
         const { fillCell, reset, getCellCoords, clearCell } = getBoard(canvas, idJoueur); //récupération des fonctions de getBoard avec un canvas en paramètre
-        
-        sock.on('connectToRoom',function(data) {
-            let room = document.getElementById('room');
-            room.innerHTML = data;
-            sock.emit('nameRoom', "room-"+data);
-        });
 
         //const onClick = (e) => { //envoie les coords de l'endroit cliqué côté serv
         //    const { x, y } = getClickCoords(canvas, e);
@@ -124,17 +115,19 @@ const getClickCoords = (elem, event) => { //renvoie les coords de l'event dans l
                 tmpXToSwitch = x2;
                 tmpYToSwitch = y2;
                 sock.emit('swap', ({tmpX, tmpY, tmpXToSwitch, tmpYToSwitch}));
-                sock.on('retourSwap', ({pion, pionToSwitch}) => {
-                    clearCell(tmpX, tmpY);
-                    clearCell(tmpXToSwitch, tmpYToSwitch);
-                    fillCell(tmpX, tmpY, pion);
-                    fillCell(tmpXToSwitch, tmpYToSwitch, pionToSwitch);
-                    console.log("swap!");
-                });
+                
                 console.log("tmp x et y = " + tmpX + " " + tmpY + " tmptoswitch x et y = " + tmpXToSwitch + " " + tmpYToSwitch);
-                cl++;
+                cl = 0;
             }
         };
+        sock.on('retourSwap', ({pion, pionToSwitch}) => {
+            clearCell(tmpX, tmpY);
+            clearCell(tmpXToSwitch, tmpYToSwitch);
+            fillCell(tmpX, tmpY, pion);
+            fillCell(tmpXToSwitch, tmpYToSwitch, pionToSwitch);
+            console.log("swap!");
+        });
+
         canvas.addEventListener('click', onClick);
 
         sock.on('board', reset);
@@ -147,6 +140,12 @@ const getClickCoords = (elem, event) => { //renvoie les coords de l'event dans l
         //test1.battle(test2);
         //console.log(test1.alive);
         //console.log(test2.alive);
+    });
+
+    sock.on('connectToRoom',function(data) {
+        let room = document.getElementById('room');
+        room.innerHTML = data;
+        sock.emit('nameRoom', "room-"+data);
     });
 
 })();
