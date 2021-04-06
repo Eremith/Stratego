@@ -94,7 +94,8 @@ io.on('connection', (sock) => {
 
     sock.emit('sendData', dataPlayer);
 
-    io.sockets.in("room-"+roomno).emit('connectToRoom', roomno);
+    let name = sock.handshake.session.username;
+    io.sockets.in("room-"+roomno).emit('connectToRoom', {roomno, name});
 
     let nbRoom = 0;
     sock.on('nameRoom', (room)=>{
@@ -118,12 +119,18 @@ io.on('connection', (sock) => {
     });
     */
 
-    sock.on('swap', ({tmpX, tmpY, tmpXToSwitch, tmpYToSwitch}) => {
-        boards[nbRoom - 1].swap(tmpX, tmpY, tmpXToSwitch, tmpYToSwitch);
+    sock.on('swap', ({tmpX, tmpY, tmpXToSwitch, tmpYToSwitch, idJoueur}) => {
         let board = boards[nbRoom - 1].getBoard();
-        let pion = board[tmpY][tmpX];
-        let pionToSwitch = board[tmpYToSwitch][tmpXToSwitch];
-        io.sockets.in("room-"+roomno).emit('retourSwap', {pion, pionToSwitch});
+        console.log("id pions : " + board[tmpY][tmpX].id + " " + board[tmpYToSwitch][tmpXToSwitch].id);
+        console.log("id joueur swap : " + idJoueur);
+        if(board[tmpY][tmpX].id == idJoueur && board[tmpYToSwitch][tmpXToSwitch].id == idJoueur){
+            boards[nbRoom - 1].swap(tmpX, tmpY, tmpXToSwitch, tmpYToSwitch);
+            board = boards[nbRoom - 1].getBoard();
+            let pion = board[tmpY][tmpX];
+            let pionToSwitch = board[tmpYToSwitch][tmpXToSwitch];
+            let tmpIdJ = idJoueur;
+            io.sockets.in("room-"+roomno).emit('retourSwap', {pion, pionToSwitch, tmpIdJ});
+        }
     });
 
     sock.on('disconnect', () => {

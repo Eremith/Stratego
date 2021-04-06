@@ -114,18 +114,23 @@ const getClickCoords = (elem, event) => { //renvoie les coords de l'event dans l
                 let { x2, y2 } = getCellCoords( x, y );
                 tmpXToSwitch = x2;
                 tmpYToSwitch = y2;
-                sock.emit('swap', ({tmpX, tmpY, tmpXToSwitch, tmpYToSwitch}));
+                sock.emit('swap', ({tmpX, tmpY, tmpXToSwitch, tmpYToSwitch, idJoueur}));
                 
                 console.log("tmp x et y = " + tmpX + " " + tmpY + " tmptoswitch x et y = " + tmpXToSwitch + " " + tmpYToSwitch);
                 cl = 0;
             }
         };
-        sock.on('retourSwap', ({pion, pionToSwitch}) => {
-            clearCell(tmpX, tmpY);
-            clearCell(tmpXToSwitch, tmpYToSwitch);
-            fillCell(tmpX, tmpY, pion);
-            fillCell(tmpXToSwitch, tmpYToSwitch, pionToSwitch);
-            console.log("swap!");
+        sock.on('retourSwap', ({pion, pionToSwitch, tmpIdJ}) => {
+            if(tmpIdJ == idJoueur){
+                console.log("id joueur requete = " + tmpIdJ);
+                console.log("id pion a swap = " + pion.id);
+                console.log("pion = " + pion.image + " " + pion.id);
+                clearCell(tmpX, tmpY);
+                clearCell(tmpXToSwitch, tmpYToSwitch);
+                fillCell(tmpX, tmpY, pion);
+                fillCell(tmpXToSwitch, tmpYToSwitch, pionToSwitch);
+                console.log("swap");
+            }
         });
 
         canvas.addEventListener('click', onClick);
@@ -142,10 +147,10 @@ const getClickCoords = (elem, event) => { //renvoie les coords de l'event dans l
         //console.log(test2.alive);
     });
 
-    sock.on('connectToRoom',function(data) {
+    sock.on('connectToRoom',({roomno, name}) => {
         let room = document.getElementById('room');
-        room.innerHTML = data;
-        sock.emit('nameRoom', "room-"+data);
+        room.innerHTML = "Bonjour " + name +"! | Room " +roomno;
+        sock.emit('nameRoom', "room-"+roomno);
     });
 
 })();
