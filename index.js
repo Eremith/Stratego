@@ -64,14 +64,15 @@ app.post('/login', body('login').isLength({ min: 3 }).trim().escape(), (req, res
 });
 
 let roomno = 1;
-let clicks = [0];
+let clicks = [0]; //tableau pour les différentes rooms
 let boards = [];
 boards[0] = createBoard(10);
 let ready = [{j1:0,j2:0}];
-io.on('connection', (sock) => {
-    //const { clear, getBoard, makeTurn } = createBoard(10);
+io.on('connection', (sock) => { //si la connexion est faite
+
     console.log(sock.handshake.session.username + " connected");
 
+    //Si le nombre d'utilisateur est de plus d'un dans une room, on en recrée une avec ses variables correspondantes
     if(io.sockets.adapter.rooms.get("room-"+roomno) && io.sockets.adapter.rooms.get("room-"+roomno).size > 1){
         roomno++;
         clicks.push({j1:0,j2:0});
@@ -82,7 +83,7 @@ io.on('connection', (sock) => {
     sock.join("room-"+roomno);
 
     let tmpId;
-    if(io.sockets.adapter.rooms.get("room-"+roomno).size == 1){
+    if(io.sockets.adapter.rooms.get("room-"+roomno).size == 1){ //attribution de l'id aux joueurs
         tmpId = 0;
     } else{
         tmpId = 1;
@@ -92,9 +93,10 @@ io.on('connection', (sock) => {
         id:tmpId
     }
     //const pion = {image:"bombe", id:tmpId};
+
     console.log("name="+dataPlayer.name + " id="+dataPlayer.id);
 
-    sock.emit('sendData', dataPlayer);
+    sock.emit('sendData', dataPlayer); //envoie côté client des infos sur son id et nom
 
     let name = sock.handshake.session.username;
     io.sockets.in("room-"+roomno).emit('connectToRoom', {roomno, name});
@@ -121,6 +123,7 @@ io.on('connection', (sock) => {
     });
     */
 
+    //reception d'une requete de swap, si l'id des pions dans le board de la room correspond à l'id du joueur effectuant la requete, swap dans le board puis envoie de la validation
     sock.on('swap', ({tmpX, tmpY, tmpXToSwitch, tmpYToSwitch, idJoueur}) => {
         let board = boards[nbRoom - 1].getBoard();
         console.log("id pions : " + board[tmpY][tmpX].id + " " + board[tmpYToSwitch][tmpXToSwitch].id);
@@ -135,7 +138,7 @@ io.on('connection', (sock) => {
         }
     });
 
-    sock.on('ready', idJoueur => {
+    sock.on('ready', idJoueur => { //si les 2 joueurs sont prêts, début de la partie (pas fonctionnel à 100%)
         console.log("pret " + idJoueur);
 
         if(idJoueur == 1){
@@ -163,7 +166,7 @@ io.on('connection', (sock) => {
         }
     });
 
-    sock.on('disconnect', () => {
+    sock.on('disconnect', () => { //gestion deconnexion pour quitter la room (ne met pas encore fin à la partie)
         sock.leave("room-"+roomno);
         io.emit('new-message', 'user' + sock.handshake.session.username + ' disconnected');
         console.log(sock.handshake.session.username+' disconnected');
@@ -174,6 +177,6 @@ server.on('error', (err) =>{
     console.log(err);
 });
 
-server.listen(4200, () => {
+server.listen(4200, () => { //on écoute sur le port 4200
     console.log('Server ready');
 });

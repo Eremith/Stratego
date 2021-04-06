@@ -2,12 +2,12 @@ const getBoard = (canvas, id, numCells = 10) => { //fonctions pour gérer le boa
     const ctx = canvas.getContext('2d');
     const cellSize = Math.floor(canvas.width / numCells);
 
-    const fillCell = (x, y, pion) => { //colore une case selon couleur et ses coords
+    const fillCell = (x, y, pion) => { //place un pion aux coordonnées x y
         let img = new Image();
-        if(id == pion.id || pion.id == 2){
+        if(id == pion.id || pion.id == 2){ //Si l'id du pion est la même que l'id du joueur on l'affiche (sauf lacs)
             img.src = "images/" + pion.image + ".png";
             ctx.drawImage(img, x*cellSize, y*cellSize);
-        } else {
+        } else { //sinon on affiche le dos du pion selon l'id du joueur
             if(id == 0){
                 img.src = "images/dosrouge.png";
                 ctx.drawImage(img, x*cellSize, y*cellSize);
@@ -19,11 +19,11 @@ const getBoard = (canvas, id, numCells = 10) => { //fonctions pour gérer le boa
         console.log(pion.image + " affiched");
     };
 
-    const clearCell = (x, y) => {
+    const clearCell = (x, y) => { //clear une cellule aux coordonnées x y
         ctx.clearRect(x*cellSize, y*cellSize, cellSize - 1, cellSize - 1);
     };
 
-    const drawGrid = () => { //dessine des lignes horizontales/verticales avec methode des canvas
+    const drawGrid = () => { //dessine des lignes horizontales/verticales avec methode des canvas selon nombre de cellules et taille du canvas
         ctx.strokeStyle = "#565656";
         ctx.beginPath();
 
@@ -79,7 +79,7 @@ const getClickCoords = (elem, event) => { //renvoie les coords de l'event dans l
 };
 
 let rdy = 0;
-const ready = () => {
+const ready = () => { //toggle du bouton "prêt"
     let p = document.getElementById('pret');
     
     if(p.innerHTML == "Attente du second joueur"){
@@ -100,9 +100,9 @@ const ready = () => {
         let idJoueur = dataPlayer.id;
         console.log("id de ce joueur = " + dataPlayer.id);
 
-        const canvas = document.querySelector('canvas'); //sélection du canvas
+        const canvas = document.querySelector('canvas');
         let btn = document.getElementById('pret');
-        btn.addEventListener('click', function(){
+        btn.addEventListener('click', function(){ //envoie côté serveur de l'information : un joueur est prêt
             sock.emit('ready', idJoueur);
         });
 
@@ -119,7 +119,7 @@ const ready = () => {
         let tmpXToSwitch = "";
         let tmpYToSwitch = "";
         let cl = 0;
-        const onClick = (e) => { //
+        const onClick = (e) => { //toggle entre sélection d'un pion et sélection d'un second pion
             if(cl % 2 == 0){
                 console.log("1er pion selectionné");
                 let { x, y } = getClickCoords(canvas, e);
@@ -140,7 +140,7 @@ const ready = () => {
                 cl = 0;
             }
         };
-        sock.on('retourSwap', ({pion, pionToSwitch, tmpIdJ}) => {
+        sock.on('retourSwap', ({pion, pionToSwitch, tmpIdJ}) => { //si le swap est validé côté serveur, on affiche la nouvelle position des 2 pions
             if(tmpIdJ == idJoueur){
                 console.log("id joueur requete = " + tmpIdJ);
                 console.log("id pion a swap = " + pion.id);
@@ -153,7 +153,7 @@ const ready = () => {
             }
         });
 
-        sock.on('endPlacement', () => {
+        sock.on('endPlacement', () => { //Si les 2 joueurs sont prêts : suppression du bouton "prêt"
             alert("La partie commence");
             let p = document.getElementById('btnReady');
             p.innerHTML = "";
@@ -161,19 +161,14 @@ const ready = () => {
 
         canvas.addEventListener('click', onClick);
         
-        sock.on('board', reset);
+        sock.on('board', reset); //reset pour l'initialisation
+
+
         //sock.on('turn', ({ x, y, pion, clicks}) => fillCell(x, y, pion));
 
-        
-
-        //let test1 = new pion(1);
-        //let test2 = new pion(0);
-        //test1.battle(test2);
-        //console.log(test1.alive);
-        //console.log(test2.alive);
     });
 
-    sock.on('connectToRoom',({roomno, name}) => {
+    sock.on('connectToRoom',({roomno, name}) => { //récupération du numéro de room pour l'affichage sur la page de jeu
         let room = document.getElementById('room');
         if(room.innerHTML == ""){
             room.innerHTML = "Connecté en tant que :  " + name +" | Room " +roomno;

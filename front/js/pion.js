@@ -1,3 +1,8 @@
+//Pas encore servie
+
+
+//classe pion avec les calculs logiques pour les mouvements et les batailles
+
 class pion{
 
     constructor(number, x, y, player){
