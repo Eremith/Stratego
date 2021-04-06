@@ -5,11 +5,11 @@
 
 class pion{
 
-    constructor(number, x, y, player){
-        this.player = player;
-        this.number = number;
-        this.alive = true;
-        if (number == 0 || number == 11) {
+    constructor(number, x, y, player){  //construction d'une classe pion
+        this.player = player;           //Id de joueur
+        this.number = number;           //Puissance du pion
+        this.alive = true;              //Détermine si le pion est en vie ou non
+        if (number == 0 || number == 11) { //Boucles if pour connaitre le mouvement du pion en fonction de la puissance
             this.movement = 0;
         } else{
             if (number == 2) {
@@ -19,12 +19,12 @@ class pion{
                 this.movement == 1;
             }
         }
-        this.x = x;
-        this.y = y;
+        this.x = x; //Positions
+        this.y = y; //du pion
     }
 
-    battle(pion){
-        if (pion.number == 0) {
+    battle(pion){ //Fonction déterminant le victorieux d'un face a face
+        if (pion.number == 0) { //Boucles if prenant en compte toutes les particularités des pions
             pion.alive = false;
         }
         if (this.number == 1 && pion.number == 10) {
@@ -48,8 +48,8 @@ class pion{
         }
     }
 
-    move(tab, dir, nbomov, player){
-        if (this.player != player) {
+    move(tab, dir, nbomov, player){ //Fonction pour déplacer les pions dans un tableau a double entrée + vérification de le légitimité du mouvement
+        if (this.player != player) {  //tab le tableau, dir la direction (r)ight (l)eft (f)orward (b)ack, nbomov nombre de cases, player id du player
             alarm("Alors, on essaye de tricher mon petit bonhomme ?");
             return 0;
         }
@@ -214,7 +214,7 @@ class pion{
         }
     }
 
-    swap(pion){
+    swap(pion){ //Fonction swap pour la création du plateau
         let tmpX = this.x;
         let tmpY = this.y;
         this.x = pion.x;
