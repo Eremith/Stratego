@@ -78,6 +78,21 @@ const getClickCoords = (elem, event) => { //renvoie les coords de l'event dans l
     };
 };
 
+let rdy = 0;
+const ready = () => {
+    let p = document.getElementById('pret');
+    
+    if(p.innerHTML == "Attente du second joueur"){
+        p.innerHTML = "Prêt";
+        document.getElementById('pret').className = 'btn btn-primary';
+        rdy = 0;
+    } else {
+        p.innerHTML = "Attente du second joueur";
+        document.getElementById('pret').className = 'btn btn-warning';
+        rdy = 1;
+    }
+}
+
 (() => {
     const sock = io();
 
@@ -86,6 +101,11 @@ const getClickCoords = (elem, event) => { //renvoie les coords de l'event dans l
         console.log("id de ce joueur = " + dataPlayer.id);
 
         const canvas = document.querySelector('canvas'); //sélection du canvas
+        let btn = document.getElementById('pret');
+        btn.addEventListener('click', function(){
+            sock.emit('ready', idJoueur);
+        });
+
         console.log("id du joueur appel getboard = "+idJoueur);
         const { fillCell, reset, getCellCoords, clearCell } = getBoard(canvas, idJoueur); //récupération des fonctions de getBoard avec un canvas en paramètre
 
@@ -133,8 +153,14 @@ const getClickCoords = (elem, event) => { //renvoie les coords de l'event dans l
             }
         });
 
-        canvas.addEventListener('click', onClick);
+        sock.on('endPlacement', () => {
+            alert("La partie commence");
+            let p = document.getElementById('btnReady');
+            p.innerHTML = "";
+        });
 
+        canvas.addEventListener('click', onClick);
+        
         sock.on('board', reset);
         //sock.on('turn', ({ x, y, pion, clicks}) => fillCell(x, y, pion));
 
@@ -149,7 +175,9 @@ const getClickCoords = (elem, event) => { //renvoie les coords de l'event dans l
 
     sock.on('connectToRoom',({roomno, name}) => {
         let room = document.getElementById('room');
-        room.innerHTML = "Bonjour " + name +"! | Room " +roomno;
+        if(room.innerHTML == ""){
+            room.innerHTML = "Connecté en tant que :  " + name +" | Room " +roomno;
+        }
         sock.emit('nameRoom', "room-"+roomno);
     });
 

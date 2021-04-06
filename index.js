@@ -67,13 +67,15 @@ let roomno = 1;
 let clicks = [0];
 let boards = [];
 boards[0] = createBoard(10);
+let ready = [{j1:0,j2:0}];
 io.on('connection', (sock) => {
     //const { clear, getBoard, makeTurn } = createBoard(10);
     console.log(sock.handshake.session.username + " connected");
 
     if(io.sockets.adapter.rooms.get("room-"+roomno) && io.sockets.adapter.rooms.get("room-"+roomno).size > 1){
         roomno++;
-        clicks.push(0);
+        clicks.push({j1:0,j2:0});
+        ready.push(0);
         console.log("nouvelle room : "+clicks);
         boards.push(createBoard(10));
     } 
@@ -130,6 +132,34 @@ io.on('connection', (sock) => {
             let pionToSwitch = board[tmpYToSwitch][tmpXToSwitch];
             let tmpIdJ = idJoueur;
             io.sockets.in("room-"+roomno).emit('retourSwap', {pion, pionToSwitch, tmpIdJ});
+        }
+    });
+
+    sock.on('ready', idJoueur => {
+        console.log("pret " + idJoueur);
+
+        if(idJoueur == 1){
+            if(ready[nbRoom - 1].j2 == 0){
+                console.log("j2 ready");
+                ready[nbRoom - 1].j2 = 1;
+            } else {
+                console.log("j1 pas ready");
+                ready[nbRoom - 1].j2 = 0;
+            }
+        }
+        if(idJoueur == 0){
+            if(ready[nbRoom - 1].j1 == 0){
+                console.log("j1 ready");
+                ready[nbRoom - 1].j1 = 1;
+            } else {
+                console.log("j1 pas ready");
+                ready[nbRoom - 1].j1 = 0;
+            }
+        }
+        
+        if(ready[nbRoom - 1].j1 == 1 && ready[nbRoom - 1].j2 == 1){
+            io.sockets.in("room-"+roomno).emit('endPlacement');
+            console.log("début partie");
         }
     });
 
